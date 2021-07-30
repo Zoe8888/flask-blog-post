@@ -4,7 +4,6 @@ import datetime
 
 from flask import Flask, request, jsonify
 from flask_jwt import JWT, jwt_required, current_identity
-from flask_cors import CORS
 
 
 class User(object):
@@ -15,7 +14,7 @@ class User(object):
 
 
 def fetch_users():
-    with sqlite3.connect('blog.db') as conn:
+    with sqlite3.connect('../blog.db') as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM user")
         users = cursor.fetchall()
@@ -31,7 +30,7 @@ users = fetch_users()
 
 
 def init_user_table():
-    conn = sqlite3.connect('blog.db')
+    conn = sqlite3.connect('../blog.db')
     print("Opened database successfully")
 
     conn.execute("CREATE TABLE IF NOT EXISTS user(user_id INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -44,7 +43,7 @@ def init_user_table():
 
 
 def init_post_table():
-    with sqlite3.connect('blog.db') as conn:
+    with sqlite3.connect('../blog.db') as conn:
         conn.execute("CREATE TABLE IF NOT EXISTS post (id INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "title TEXT NOT NULL,"
                      "content TEXT NOT NULL,"
@@ -71,7 +70,6 @@ def identity(payload):
 
 
 app = Flask(__name__)
-CORS(app)
 app.debug = True
 app.config['SECRET_KEY'] = 'super-secret'
 
@@ -95,7 +93,7 @@ def user_registration():
         username = request.form['username']
         password = request.form['password']
 
-        with sqlite3.connect("blog.db") as conn:
+        with sqlite3.connect("../blog.db") as conn:
             cursor = conn.cursor()
             cursor.execute("INSERT INTO user("
                            "first_name,"
@@ -118,7 +116,7 @@ def create_blog():
         content = request.form['content']
         date_created = datetime.datetime.now()
 
-        with sqlite3.connect('blog.db') as conn:
+        with sqlite3.connect('../blog.db') as conn:
             cursor = conn.cursor()
             cursor.execute("INSERT INTO post("
                            "title,"
@@ -133,7 +131,7 @@ def create_blog():
 @app.route('/get-blogs/', methods=["GET"])
 def get_blogs():
     response = {}
-    with sqlite3.connect("blog.db") as conn:
+    with sqlite3.connect("../blog.db") as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM post")
 
@@ -148,7 +146,7 @@ def get_blogs():
 @jwt_required()
 def delete_post(post_id):
     response = {}
-    with sqlite3.connect("blog.db") as conn:
+    with sqlite3.connect("../blog.db") as conn:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM post WHERE id=" + str(post_id))
         conn.commit()
@@ -163,13 +161,13 @@ def edit_post(post_id):
     response = {}
 
     if request.method == "PUT":
-        with sqlite3.connect('blog.db') as conn:
+        with sqlite3.connect('../blog.db') as conn:
             incoming_data = dict(request.json)
             put_data = {}
 
             if incoming_data.get("title") is not None:
                 put_data["title"] = incoming_data.get("title")
-                with sqlite3.connect('blog.db') as conn:
+                with sqlite3.connect('../blog.db') as conn:
                     cursor = conn.cursor()
                     cursor.execute("UPDATE post SET title =? WHERE id=?", (put_data["title"], post_id))
                     conn.commit()
@@ -178,7 +176,7 @@ def edit_post(post_id):
             if incoming_data.get("content") is not None:
                 put_data['content'] = incoming_data.get('content')
 
-                with sqlite3.connect('blog.db') as conn:
+                with sqlite3.connect('../blog.db') as conn:
                     cursor = conn.cursor()
                     cursor.execute("UPDATE post SET content =? WHERE id=?", (put_data["content"], post_id))
                     conn.commit()
@@ -192,7 +190,7 @@ def edit_post(post_id):
 def get_post(post_id):
     response = {}
 
-    with sqlite3.connect("blog.db") as conn:
+    with sqlite3.connect("../blog.db") as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM post WHERE id=" + str(post_id))
 
