@@ -109,7 +109,7 @@ def user_registration():
 
 
 @app.route('/create-blog/', methods=["POST"])
-@jwt_required()
+# @jwt_required()
 def create_blog():
     response = {}
 
